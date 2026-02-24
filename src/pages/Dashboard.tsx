@@ -4,30 +4,10 @@ import { fullEvents as initialData } from "../data/mockData";
 
 export default function Dashboard() {
   const [events, setEvents] = useState(initialData);
-  const [newEventName, setNewEventName] = useState("");
-  const [newEventTime, setNewEventTime] = useState("");
 
   const deleteEvent = (id: number) => {
     const updatedEvents = events.filter((event) => event.id !== id);
     setEvents(updatedEvents);
-  };
-
-  const addCustomEvent = () => {
-    if (newEventName.trim() === ""|| newEventTime.trim() === "") return;
-
-    const newEvent = {
-      id: Date.now(),
-      label: newEventName,
-      time: newEventTime,
-      initials: newEventName.substring(0, 2).toUpperCase(),
-      color: "blue", // "blue" est plus sûr pour les classes Tailwind
-      status: "En attente",
-    };
-
-    setEvents([...events, newEvent]);
-    // On vide les deux champs après l'ajout
-    setNewEventName("");
-    setNewEventTime("");
   };
 
   return (
@@ -58,11 +38,11 @@ export default function Dashboard() {
               >
                 <div className="flex items-center">
                   <div className="w-10 h-10 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-bold">
-                    {event.initials}
+                    {event.titre.substring(0, 2).toUpperCase()}
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-semibold text-gray-800">{event.label}</p>
-                    <p className="text-xs text-gray-500">{event.time}</p>
+                    <p className="text-sm font-semibold text-gray-800">{event.titre}</p>
+                    <p className="text-xs text-gray-500">{event.date}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">

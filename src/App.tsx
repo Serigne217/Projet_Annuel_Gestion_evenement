@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import Events from './pages/Events';
 import Budget from './pages/Budget';
+import Partners from './pages/Partners';
+import Reports from './pages/Reports';
 
 function App() {
   return (
@@ -15,6 +17,13 @@ function App() {
         
         {/* La page gestion budget */}
         <Route path="/budget" element={<Budget />} />
+
+        {/* La page partenaires */}
+        <Route path="/partners" element={<Partners />} />
+
+        {/* La page comptes rendus */}  
+        <Route path="/reports" element={<Reports />} />
+
       </Routes>
     </Router>
   );

@@ -18,7 +18,7 @@ export const dashboardStats = {
 export const fullEvents = [
   {
     id: 1,
-    label: "Hackathon Interne",
+    titre: "Hackathon Interne",
     category: "Innovation",
     date: "15 Janvier 2026",
     location: "Salle Créativité",
@@ -30,7 +30,7 @@ export const fullEvents = [
   },
   {
     id: 2,
-    label: "Déjeuner d'équipe",
+    titre: "Déjeuner d'équipe",
     category: "Cohésion",
     date: "20 Décembre 2025",
     location: "Le Bistrot",
