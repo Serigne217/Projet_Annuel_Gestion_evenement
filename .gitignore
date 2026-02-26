@@ -1,0 +1,15 @@
+# Ne jamais envoyer les librairies téléchargées
+node_modules/
+Frontend/node_modules/
+
+# Ne pas envoyer les fichiers de compilation Java
+target/
+*.class
+
+# Ne pas envoyer les dossiers d'IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Fichiers de log
+*.log

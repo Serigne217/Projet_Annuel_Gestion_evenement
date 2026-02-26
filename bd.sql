@@ -1,3 +1,8 @@
+DROP DATABASE IF EXISTS projet_annuel_m1;
+
+CREATE DATABASE IF NOT EXISTS projet_annuel_m1;
+
+USE projet_annuel_m1;
 -- -------------------------------------------------------------
 -- 1. Table des Utilisateurs
 -- -------------------------------------------------------------
@@ -32,7 +37,7 @@ CREATE TABLE UtilisateurRole (
 -- -------------------------------------------------------------
 -- 4. Table des Événements
 -- -------------------------------------------------------------
-CREATE TABLE Evenement (
+CREATE TABLE Evenements (
     id_evt INT PRIMARY KEY AUTO_INCREMENT,
     titre VARCHAR(200) NOT NULL,
     date_debut DATE NOT NULL,
@@ -45,7 +50,7 @@ CREATE TABLE Evenement (
     id_responsable INT, -- Renommé pour plus de clarté
     FOREIGN KEY (id_responsable) REFERENCES Utilisateur(id_user)
 );
-CREATE INDEX idx_evenement_id_responsable ON Evenement(id_responsable);
+CREATE INDEX idx_evenement_id_responsable ON Evenements(id_responsable);
 
 -- -------------------------------------------------------------
 -- 5. Table des Catégories de Budget
@@ -79,7 +84,7 @@ CREATE TABLE Transaction (
     id_evt INT,
     id_cat INT NOT NULL,
     id_partenaire INT,
-    FOREIGN KEY (id_evt) REFERENCES Evenement(id_evt),
+    FOREIGN KEY (id_evt) REFERENCES Evenements(id_evt),
     FOREIGN KEY (id_cat) REFERENCES CategorieBudget(id_cat),
     FOREIGN KEY (id_partenaire) REFERENCES Partenaire(id_partenaire)
 );
@@ -96,7 +101,7 @@ CREATE TABLE CompteRendu (
     date_reunion DATE NOT NULL,
     notes TEXT,
     id_evt INT,
-    FOREIGN KEY (id_evt) REFERENCES Evenement(id_evt)
+    FOREIGN KEY (id_evt) REFERENCES Evenements(id_evt)
 );
 CREATE INDEX idx_compteRendu_id_evt ON CompteRendu(id_evt);
 
@@ -118,7 +123,7 @@ CREATE TABLE Evenement_Partenaire (
     id_evt INT NOT NULL,
     id_partenaire INT NOT NULL,
     PRIMARY KEY (id_evt, id_partenaire),
-    FOREIGN KEY (id_evt) REFERENCES Evenement(id_evt) ON DELETE CASCADE,
+    FOREIGN KEY (id_evt) REFERENCES Evenements(id_evt) ON DELETE CASCADE,
     FOREIGN KEY (id_partenaire) REFERENCES Partenaire(id_partenaire) ON DELETE CASCADE
 );
 
@@ -133,7 +138,7 @@ CREATE TABLE Document (
     id_evt INT,
     id_transac INT,
     id_cr INT,
-    FOREIGN KEY (id_evt) REFERENCES Evenement(id_evt),
+    FOREIGN KEY (id_evt) REFERENCES Evenements(id_evt),
     FOREIGN KEY (id_transac) REFERENCES Transaction(id_transac),
     FOREIGN KEY (id_cr) REFERENCES CompteRendu(id_cr)
 );
