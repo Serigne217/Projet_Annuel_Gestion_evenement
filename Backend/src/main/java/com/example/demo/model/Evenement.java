@@ -1,6 +1,6 @@
 package com.example.demo.model;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -15,7 +15,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "evenements")
+@Table(name = "Evenements")
 @Data 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,12 +30,12 @@ public class Evenement {
     private String titre;
 
     @Column(name = "date_debut")
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate date_debut; 
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    private LocalDateTime date_debut; 
 
     @Column(name = "date_fin")
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate date_fin;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    private LocalDateTime date_fin;
 
     private String lieu;
     private String categorie;

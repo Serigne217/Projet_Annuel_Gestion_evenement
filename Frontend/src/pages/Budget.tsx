@@ -1,88 +1,141 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import Layout from "../components/Layout";
 import TransactionForm from "../components/TransactionForm";
 
+interface TransactionItem {
+  id_transac: number;
+  date_mouvement: string;
+  type: string;
+  montant: number;
+  description: string;
+  valide: boolean;
+  id_evt: number;
+  id_cat: number;
+  id_partenaire: number;
+}
+
+interface CategoryItem {
+  id_cat: number;
+  nom_categorie: string;
+}
+
+interface EventItem {
+  id: number;
+  titre: string;
+}
+
 export default function Budget() {
+  const [transactions, setTransactions] = useState<TransactionItem[]>([]);
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [partners, setPartners] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
-  // Données des catégories et événements
-  const categories = [
-    {id: 1, nom_categorie: "Logistique"},
-    {id: 2, nom_categorie: "Traiteur"},
-    {id: 3, nom_categorie: "Décoration"},
-    {id: 4, nom_categorie: "Animation"},
-    {id: 5, nom_categorie: "Fournitures"}
-  ];
-  
-  const evenements = [
-    {id: 1, titre: "Budget Général"},
-    {id: 2, titre: "Événement Été"}
-  ];
-  
-  // Fonctions pour trouver les noms par ID
-  const getCategoryName = (id: string | number) => {
-    const cat = categories.find(c => c.id === Number(id));
+
+  // RÉCUPÉRATION - Port 8090
+  const fetchData = async () => {
+    try {
+      const [transRes, catRes, eventsRes, partnersRes] = await Promise.all([
+        axios.get("http://localhost:8090/api/transactions"),
+        axios.get("http://localhost:8090/api/categories"),
+        axios.get("http://localhost:8090/api/events"),
+        axios.get("http://localhost:8090/api/partners")
+      ]);
+      setTransactions(transRes.data);
+      setCategories(catRes.data);
+      setEvents(eventsRes.data);
+      setPartners(partnersRes.data);
+    } catch (error) {
+      console.error("Erreur de connexion au serveur (8090):", error);
+    }
+  };
+
+  // CRÉATION - Port 8090
+  const handleCreateTransaction = async (data: any) => {
+    try {
+      const transactionToSend = {
+        date_mouvement: data.date_mouvement,
+        type: data.type === 'Débit' ? 'Dépense' : 'Recette',
+        montant: parseFloat(data.montant),
+        description: data.description,
+        valide: data.valide,
+        id_evt: parseInt(data.id_evt),
+        id_cat: parseInt(data.id_cat),
+        id_partenaire: data.id_partenaire ? parseInt(data.id_partenaire) : null
+      };
+
+      await axios.post("http://localhost:8090/api/transactions", transactionToSend);
+      fetchData(); // Recharger les données
+    } catch (error) {
+      console.error("Erreur lors de la création:", error);
+    }
+  };
+
+  // CHARGEMENT DES DONNÉES AU MONTAGE
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Calcul des statistiques
+  const getTotalBudget = () => {
+    const depenses = transactions
+      .filter(t => t.type === "Dépense" && t.valide)
+      .reduce((sum, t) => sum + t.montant, 0);
+    return depenses;
+  };
+
+  const getReceipts = () => {
+    return transactions
+      .filter(t => t.type === "Recette" && t.valide)
+      .reduce((sum, t) => sum + t.montant, 0);
+  };
+
+  const getCategoryName = (id: number) => {
+    const cat = categories.find(c => c.id_cat === id);
     return cat ? cat.nom_categorie : "Non catégorisée";
   };
-  
-  const getEventName = (id: string | number) => {
-    const evt = evenements.find(e => e.id === Number(id));
-    return evt ? evt.titre : "Non lié";
-  };
-  
-  // Données fictives pour l'affichage initial
-  const [transactions, setTransactions] = useState([
-    { id: 1, description: "Achat Fournitures Bureau", montant: "150", type: "Débit", date: "2026-02-10", id_evt: 1, id_cat: 5, valide: true },
-    { id: 2, description: "Subvention CSE Q1", montant: "5000", type: "Crédit", date: "2026-01-05", id_evt: 1, id_cat: 1, valide: true }
-  ]);
 
-  const handleAddTransaction = (data: any) => {
-    const newTrans = { 
-      id: Date.now(), 
-      description: data.description, 
-      montant: data.montant, 
-      type: data.type, 
-      date: data.date_mouvement, 
-      id_evt: data.id_evt,
-      id_cat: data.id_cat,
-      valide: data.valide || false
-    };
-    setTransactions([newTrans, ...transactions]);
-    setIsModalOpen(false);
-  };
+  const totalReceipts = getReceipts();
+  const totalExpenses = getTotalBudget();
+  const budgetRemaining = 25000 - totalExpenses;
 
   return (
-    <Layout title="Gestion Budgétaire 2026">
+    <Layout title="Gestion Budgétaire 2026" searchTerm={searchTerm} onSearch={setSearchTerm}>
       
       {/* 1. LES JAUGES (Ton code original amélioré) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-        {/* Budget CSE */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        {/* Budget Total */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-bold text-gray-700 text-lg">Budget CSE Annuel</h3>
-            <span className="text-sm font-semibold text-gray-500">Total : 20 000 €</span>
+            <h3 className="font-bold text-gray-700 text-lg">Budget Total</h3>
+            <span className="text-sm font-semibold text-gray-500">25 000 €</span>
           </div>
           <div className="mb-2 flex justify-between text-sm">
-            <span className="text-green-600 font-bold">Consommé : 12 450 €</span>
-            <span className="text-gray-400">Reste : 7 550 €</span>
+            <span className="text-red-600 font-bold">Dépenses : {totalExpenses.toFixed(2)} €</span>
+            <span className="text-gray-400">Reste : {budgetRemaining.toFixed(2)} €</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-4">
-            <div className="bg-green-500 h-4 rounded-full" style={{ width: "62%" }}></div>
+            <div className="bg-red-500 h-4 rounded-full" style={{ width: `${(totalExpenses / 25000) * 100}%` }}></div>
           </div>
         </div>
 
-        {/* Frais fonctionnement */}
+        {/* Recettes */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-bold text-gray-700 text-lg">Frais de Fonctionnement</h3>
-            <span className="text-sm font-semibold text-gray-500">Total : 5 000 €</span>
+            <h3 className="font-bold text-gray-700 text-lg">Recettes</h3>
           </div>
-          <div className="mb-2 flex justify-between text-sm">
-            <span className="text-orange-600 font-bold">Consommé : 4 100 €</span>
-            <span className="text-gray-400">Reste : 900 €</span>
+          <div className="text-3xl font-bold text-green-600">{totalReceipts.toFixed(2)} €</div>
+          <p className="text-xs text-gray-400 mt-2">Crédits validés</p>
+        </div>
+
+        {/* Solde */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-bold text-gray-700 text-lg">Solde Net</h3>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-4">
-            <div className="bg-orange-500 h-4 rounded-full" style={{ width: "82%" }}></div>
+          <div className={`text-3xl font-bold ${(totalReceipts - totalExpenses) >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+            {(totalReceipts - totalExpenses).toFixed(2)} €
           </div>
         </div>
       </div>
@@ -111,18 +164,20 @@ export default function Budget() {
             </tr>
           </thead>
           <tbody>
-            {transactions.map((t) => (
-              <tr key={t.id} className="hover:bg-gray-50 transition border-b border-gray-100 last:border-0">
+            {transactions
+              .filter(t => t.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          getCategoryName(t.id_cat)?.toLowerCase().includes(searchTerm.toLowerCase()))
+              .map((t) => (
+              <tr key={t.id_transac} className="hover:bg-gray-50 transition border-b border-gray-100 last:border-0">
                 <td className="px-5 py-4">
-                  <p className="font-bold text-gray-800">{t.description}</p>
-                  <p className="text-[10px] text-gray-400 uppercase font-medium">{getEventName(t.id_evt)}</p>
+                  <p className="font-bold text-gray-800">{t.description || "---"}</p>
                 </td>
-                <td className="px-5 py-4 text-sm text-gray-500">{t.date}</td>
+                <td className="px-5 py-4 text-sm text-gray-500">{t.date_mouvement}</td>
                 <td className="px-5 py-4">
                   <span className="text-sm text-gray-600 font-medium">{getCategoryName(t.id_cat)}</span>
                 </td>
                 <td className="px-5 py-4 text-center">
-                  <span className={`px-2 py-1 rounded-md text-[10px] font-bold ${t.type === 'Crédit' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                  <span className={`px-2 py-1 rounded-md text-[10px] font-bold ${t.type === 'Recette' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                     {t.type.toUpperCase()}
                   </span>
                 </td>
@@ -131,8 +186,8 @@ export default function Budget() {
                     {t.valide ? "✓ OUI" : "⏳ NON"}
                   </span>
                 </td>
-                <td className={`px-5 py-4 text-right font-bold ${t.type === 'Crébit' ? 'text-green-600' : 'text-red-600'}`}>
-                  {t.type === 'Débit' ? '-' : '+'}{t.montant} €
+                <td className={`px-5 py-4 text-right font-bold ${t.type === 'Recette' ? 'text-green-600' : 'text-red-600'}`}>
+                  {t.type === 'Dépense' ? '-' : '+'}{t.montant.toFixed(2)} €
                 </td>
               </tr>
             ))}
@@ -140,12 +195,15 @@ export default function Budget() {
         </table>
       </div>
 
-      {/* 3. MODALE DE TRANSACTION */}
+      {/* MODAL FORMULAIRE TRANSACTION */}
       {isModalOpen && (
-        <TransactionForm 
-          onClose={() => setIsModalOpen(false)} 
-          onSubmit={handleAddTransaction}
-          evenements={evenements}
+        <TransactionForm
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={(data) => {
+            handleCreateTransaction(data);
+            setIsModalOpen(false);
+          }}
+          evenements={events}
           categories={categories}
         />
       )}

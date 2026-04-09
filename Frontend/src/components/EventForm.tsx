@@ -1,8 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 interface EventFormProps {
   onClose: () => void;
   onSubmit: (data: any) => void;
+}
+
+interface User {
+  id_user: number;
+  nom: string;
+  prenom: string;
+  email: string;
+  statut: string;
 }
 
 export default function EventForm({ onClose, onSubmit }: EventFormProps) {
@@ -14,9 +23,65 @@ export default function EventForm({ onClose, onSubmit }: EventFormProps) {
     categorie: 'Innovation',
     description: '',
     budget_alloue: '',
-    statut: 'En attente',
-    id_responsable: '1' // On l'ajoute ici
+    statut: 'À venir',
+    id_responsable: ''
   });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validation des dates
+    if (formData.date_debut && formData.date_fin) {
+      const startDate = new Date(formData.date_debut);
+      const endDate = new Date(formData.date_fin);
+
+      if (startDate >= endDate) {
+        alert('La date de début doit être antérieure à la date de fin.');
+        return;
+      }
+    }
+
+    onSubmit(formData);
+  };
+  const getCurrentDateTime = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  // Fonction pour obtenir la date/heure minimum pour la fin (début + 1 minute)
+  const getMinEndDateTime = () => {
+    if (!formData.date_debut) return getCurrentDateTime();
+    const startDate = new Date(formData.date_debut);
+    const minEndDate = new Date(startDate.getTime() + 60000); // +1 minute
+    const year = minEndDate.getFullYear();
+    const month = String(minEndDate.getMonth() + 1).padStart(2, '0');
+    const day = String(minEndDate.getDate()).padStart(2, '0');
+    const hours = String(minEndDate.getHours()).padStart(2, '0');
+    const minutes = String(minEndDate.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  // Charger les administrateurs
+  useEffect(() => {
+    const fetchAdministrators = async () => {
+      try {
+        const response = await axios.get('http://localhost:8090/api/users');
+        // Filtrer les administrateurs (ceux qui ont type_utilisateur = 'Admin' ou 'Administrateur')
+        const admins = response.data.filter((user: any) =>
+          user.type_utilisateur === 'Admin' || user.type_utilisateur === 'Administrateur'
+        );
+        setAdministrators(admins);
+      } catch (error) {
+        console.error('Erreur lors du chargement des administrateurs:', error);
+      }
+    };
+    fetchAdministrators();
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,21 +109,23 @@ export default function EventForm({ onClose, onSubmit }: EventFormProps) {
             />
           </div>
 
-          {/* Dates */}
+          {/* Dates avec heures */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Date Début *</label>
+              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Date & Heure Début *</label>
               <input 
-                type="date" required value={formData.date_debut}
-                className="w-full p-2 bg-gray-50 border rounded-lg outline-none"
+                type="datetime-local" required value={formData.date_debut}
+                min={getCurrentDateTime()}
+                className="w-full p-2 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-orange-500"
                 onChange={(e) => setFormData({...formData, date_debut: e.target.value})} 
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Date Fin</label>
+              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Date & Heure Fin</label>
               <input 
-                type="date" value={formData.date_fin}
-                className="w-full p-2 bg-gray-50 border rounded-lg outline-none"
+                type="datetime-local" value={formData.date_fin}
+                min={getMinEndDateTime()}
+                className="w-full p-2 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-orange-500"
                 onChange={(e) => setFormData({...formData, date_fin: e.target.value})} 
               />
             </div>
@@ -75,13 +142,19 @@ export default function EventForm({ onClose, onSubmit }: EventFormProps) {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Responsable (ID) *</label>
+              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Responsable *</label>
               <select 
+                required
                 value={formData.id_responsable}
-                className="w-full p-2 bg-gray-50 border rounded-lg outline-none"
+                className="w-full p-2 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-orange-500"
                 onChange={(e) => setFormData({...formData, id_responsable: e.target.value})}
               >
-                <option value="1">Administrateur (ID 1)</option>
+                <option value="">Sélectionner un administrateur</option>
+                {administrators.map((admin) => (
+                  <option key={admin.id_user} value={admin.id_user}>
+                    {admin.prenom} {admin.nom} ({admin.email})
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -100,13 +173,10 @@ export default function EventForm({ onClose, onSubmit }: EventFormProps) {
               <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Statut</label>
               <select 
                 value={formData.statut}
-                className="w-full p-2 bg-gray-50 border rounded-lg outline-none"
+                className="w-full p-2 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-orange-500"
                 onChange={(e) => setFormData({...formData, statut: e.target.value})}
               >
-                <option value="En attente">En attente</option>
-                <option value="Validé">Validé</option>
-                <option value="Terminé">Terminé</option>
-                <option value="Annulé">Annulé</option>
+                <option value="À venir">À venir</option>
               </select>
             </div>
           </div>

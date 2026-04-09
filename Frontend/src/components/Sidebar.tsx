@@ -28,7 +28,7 @@ export default function Sidebar() {
         <p className="text-[10px] font-bold text-slate-500 uppercase px-3 mt-6 mb-2 tracking-widest">Finance & Suivi</p>
         
         <Link to="/budget" className={linkClass('/budget')}>
-          <i className="fa-solid fa-euro-sign w-6" /> Transactions
+          <i className="fa-solid fa-euro-sign w-6" /> Budget & Transactions
         </Link>
 
         <Link to="/categories" className={linkClass('/categories')}>

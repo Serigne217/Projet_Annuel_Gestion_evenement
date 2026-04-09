@@ -36,6 +36,7 @@ export default function CompteRenduForm({ onClose, onSubmit, evenements }: CRFor
             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Date de la réunion</label>
             <input type="date" required className="w-full p-2.5 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
               value={formData.date_reunion}
+              min={new Date().toISOString().split('T')[0]}
               onChange={(e) => setFormData({...formData, date_reunion: e.target.value})} />
           </div>
           

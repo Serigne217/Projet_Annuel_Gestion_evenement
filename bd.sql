@@ -145,3 +145,45 @@ CREATE TABLE Document (
 CREATE INDEX idx_document_id_evt ON Document(id_evt);
 CREATE INDEX idx_document_id_transac ON Document(id_transac);
 CREATE INDEX idx_document_id_cr ON Document(id_cr);
+
+-- -------------------------------------------------------------
+-- MODIFICATIONS POUR SUPPORTER LES HEURES
+-- -------------------------------------------------------------
+
+-- Changer les colonnes date en datetime pour supporter les heures
+ALTER TABLE Evenements MODIFY COLUMN date_debut DATETIME NOT NULL;
+ALTER TABLE Evenements MODIFY COLUMN date_fin DATETIME;
+
+-- Ajouter la colonne type_utilisateur à la table Utilisateur
+ALTER TABLE Utilisateur ADD COLUMN type_utilisateur VARCHAR(50) DEFAULT 'Utilisateur';
+
+-- -------------------------------------------------------------
+-- DONNÉES DE TEST
+-- -------------------------------------------------------------
+
+-- Insertion des rôles
+INSERT INTO Role (libelle) VALUES ('Admin'), ('Utilisateur');
+
+-- Insertion des utilisateurs de test
+INSERT INTO Utilisateur (nom, prenom, email, mot_de_passe, statut, type_utilisateur) VALUES
+('Dupont', 'Jean', 'jean.dupont@email.com', 'password123', 'Actif', 'Admin'),
+('Martin', 'Marie', 'marie.martin@email.com', 'password123', 'Actif', 'Utilisateur');
+
+-- Attribution des rôles aux utilisateurs
+INSERT INTO UtilisateurRole (id_user, id_role) VALUES
+(1, 1), -- Jean Dupont est Admin
+(2, 2); -- Marie Martin est Utilisateur
+
+-- Insertion de catégories de budget de test
+INSERT INTO CategorieBudget (nom_categorie) VALUES
+('Matériel'),
+('Transport'),
+('Hébergement'),
+('Restauration'),
+('Communication');
+
+-- Insertion de partenaires de test
+INSERT INTO Partenaire (nom, type_activite, contact, adresse) VALUES
+('TechCorp', 'Technologie', 'contact@techcorp.com', '123 Rue de la Tech'),
+('EventPlus', 'Événementiel', 'info@eventplus.fr', '456 Avenue des Événements'),
+('CateringPro', 'Restauration', 'bonjour@cateringpro.com', '789 Boulevard Gastronomique');

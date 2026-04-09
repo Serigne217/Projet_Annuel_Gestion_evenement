@@ -5,20 +5,22 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "Utilisateur")
+@Table(name = "Partenaire")
 @Data
-public class Utilisateur {
+@NoArgsConstructor
+@AllArgsConstructor
+public class Partenaire {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id_user;
-    
+    private Integer id_partenaire;
+
     private String nom;
-    private String prenom;
-    private String email;
-    private String mot_de_passe;
-    private String statut;
-    private String type_utilisateur;
+    private String type_activite;
+    private String contact;
+    private String adresse;
 }

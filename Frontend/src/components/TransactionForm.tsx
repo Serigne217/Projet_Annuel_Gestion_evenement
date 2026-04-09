@@ -12,7 +12,7 @@ interface TransactionFormProps {
 export default function TransactionForm({ onClose, onSubmit, evenements, categories }: TransactionFormProps) {
   const [formData, setFormData] = useState({
     date_mouvement: new Date().toISOString().split('T')[0],
-    type: 'Débit',
+    type: 'Dépense',
     montant: '',
     description: '',
     id_evt: '',
@@ -20,6 +20,9 @@ export default function TransactionForm({ onClose, onSubmit, evenements, categor
     id_partenaire: '',
     valide: false
   });
+
+  // Debug logging
+  console.log('TransactionForm props:', { evenements, categories });
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -35,14 +38,16 @@ export default function TransactionForm({ onClose, onSubmit, evenements, categor
               <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Date</label>
               <input type="date" required className="w-full p-2.5 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
                 value={formData.date_mouvement}
+                min={new Date().toISOString().split('T')[0]}
                 onChange={(e) => setFormData({...formData, date_mouvement: e.target.value})} />
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Type</label>
-              <select className="w-full p-2.5 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+              <select required className="w-full p-2.5 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+                value={formData.type}
                 onChange={(e) => setFormData({...formData, type: e.target.value})}>
-                <option value="Débit">Débit (Dépense)</option>
-                <option value="Crédit">Crédit (Recette)</option>
+                <option value="Dépense">Débit (Dépense)</option>
+                <option value="Recette">Crédit (Recette)</option>
               </select>
             </div>
           </div>
@@ -50,6 +55,7 @@ export default function TransactionForm({ onClose, onSubmit, evenements, categor
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Montant (€)</label>
             <input type="number" step="0.01" required className="w-full p-2.5 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+              value={formData.montant}
               onChange={(e) => setFormData({...formData, montant: e.target.value})} />
           </div>
 
@@ -57,21 +63,31 @@ export default function TransactionForm({ onClose, onSubmit, evenements, categor
             <div>
               <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Catégorie</label>
               <select required className="w-full p-2.5 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+                value={formData.id_cat}
                 onChange={(e) => setFormData({...formData, id_cat: e.target.value})}>
                 <option value="">Sélectionner...</option>
-                {categories && categories.map((cat: any) => (
-                  <option key={cat.id} value={cat.id}>{cat.nom_categorie || cat.nom}</option>
-                ))}
+                {Array.isArray(categories) && categories.length > 0 ? (
+                  categories.map((cat: any) => (
+                    <option key={cat.id_cat} value={cat.id_cat}>{cat.nom_categorie}</option>
+                  ))
+                ) : (
+                  <option disabled>Aucune catégorie disponible</option>
+                )}
               </select>
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Événement</label>
               <select required className="w-full p-2.5 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+                value={formData.id_evt}
                 onChange={(e) => setFormData({...formData, id_evt: e.target.value})}>
                 <option value="">Sélectionner...</option>
-                {evenements.map((evt: any) => (
-                  <option key={evt.id} value={evt.id}>{evt.titre}</option>
-                ))}
+                {Array.isArray(evenements) && evenements.length > 0 ? (
+                  evenements.map((evt: any) => (
+                    <option key={evt.id} value={evt.id}>{evt.titre}</option>
+                  ))
+                ) : (
+                  <option disabled>Aucun événement disponible</option>
+                )}
               </select>
             </div>
           </div>
@@ -79,11 +95,13 @@ export default function TransactionForm({ onClose, onSubmit, evenements, categor
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Description</label>
             <textarea className="w-full p-2.5 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none" rows={2}
+              value={formData.description}
               onChange={(e) => setFormData({...formData, description: e.target.value})}></textarea>
           </div>
 
           <div className="flex items-center gap-2">
             <input type="checkbox" id="valide" className="w-4 h-4"
+              checked={formData.valide}
               onChange={(e) => setFormData({...formData, valide: e.target.checked})} />
             <label htmlFor="valide" className="text-xs font-bold text-slate-500 uppercase">Validée</label>
           </div>

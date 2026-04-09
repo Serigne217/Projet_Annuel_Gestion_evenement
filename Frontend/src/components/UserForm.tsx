@@ -11,7 +11,8 @@ export default function UserForm({ onClose, onSubmit }: UserFormProps) {
     prenom: '',
     email: '',
     mot_de_passe: '',
-    statut: 'Actif'
+    statut: 'Actif',
+    type_utilisateur: 'Utilisateur'
   });
 
   return (
@@ -34,12 +35,27 @@ export default function UserForm({ onClose, onSubmit }: UserFormProps) {
           <input type="password" placeholder="Mot de passe" required className="w-full p-2.5 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-orange-500"
             onChange={(e) => setFormData({...formData, mot_de_passe: e.target.value})} />
           
-          <select className="w-full p-2.5 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-orange-500" required
-            onChange={(e) => setFormData({...formData, statut: e.target.value})}>
-            <option value="Actif">Actif</option>
-            <option value="Inactif">Inactif</option>
-            <option value="Suspendu">Suspendu</option>
-          </select>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Type d'utilisateur</label>
+              <select className="w-full p-2.5 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none" required
+                value={formData.type_utilisateur}
+                onChange={(e) => setFormData({...formData, type_utilisateur: e.target.value})}>
+                <option value="Utilisateur">Utilisateur</option>
+                <option value="Administrateur">Administrateur</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Statut</label>
+              <select className="w-full p-2.5 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none" required
+                value={formData.statut}
+                onChange={(e) => setFormData({...formData, statut: e.target.value})}>
+                <option value="Actif">Actif</option>
+                <option value="Inactif">Inactif</option>
+                <option value="Suspendu">Suspendu</option>
+              </select>
+            </div>
+          </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t">
             <button type="button" onClick={onClose} className="px-4 py-2 text-slate-400 font-bold">ANNULER</button>
