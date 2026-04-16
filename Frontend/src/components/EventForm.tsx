@@ -27,6 +27,8 @@ export default function EventForm({ onClose, onSubmit }: EventFormProps) {
     id_responsable: ''
   });
 
+  const [administrators, setAdministrators] = useState<User[]>([]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 

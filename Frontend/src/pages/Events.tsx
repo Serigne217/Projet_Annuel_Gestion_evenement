@@ -42,7 +42,7 @@ export default function Events() {
       description: data.description || "",
       budget_alloue: data.budget_alloue ? parseFloat(data.budget_alloue) : 0,
       statut: "À venir",
-      id_responsable: 1
+      id_responsable: data.id_responsable ? parseInt(data.id_responsable) : 1
     };
 
     try {
