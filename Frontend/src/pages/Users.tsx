@@ -13,6 +13,7 @@ interface User {
 
 export default function Users() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
 
   // 1. Charger les utilisateurs depuis le Backend (Port 8090)
@@ -29,19 +30,31 @@ export default function Users() {
     fetchUsers();
   }, []);
 
-  // 2. Fonction pour ajouter un utilisateur (appelée par le formulaire)
-  const handleAddUser = async (userData: any) => {
+  // 2. Fonction pour ajouter ou modifier un utilisateur
+  const handleSaveUser = async (userData: any) => {
     try {
-      // Envoi au Backend Java
-      await axios.post("http://localhost:8090/api/users", userData);
-      
-      // Si ça marche : on rafraîchit la liste et on ferme la fenêtre
-      fetchUsers(); 
+      if (editingUser?.id_user) {
+        await axios.put(`http://localhost:8090/api/users/${editingUser.id_user}`, userData);
+      } else {
+        await axios.post("http://localhost:8090/api/users", userData);
+      }
+      fetchUsers();
       setIsModalOpen(false);
+      setEditingUser(null);
     } catch (error) {
-      console.error("Erreur lors de l'ajout :", error);
-      alert("Erreur : l'utilisateur n'a pas pu être créé.");
+      console.error("Erreur lors de l'enregistrement :", error);
+      alert("Erreur : l'opération n'a pas pu être effectuée.");
     }
+  };
+
+  const openEditUser = (user: User) => {
+    setEditingUser(user);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingUser(null);
   };
 
   return (
@@ -66,6 +79,7 @@ export default function Users() {
             <tr className="bg-gray-50 border-b">
               <th className="px-5 py-3 text-left text-xs font-bold text-gray-600 uppercase">Utilisateur</th>
               <th className="px-5 py-3 text-center text-xs font-bold text-gray-600 uppercase">Statut</th>
+              <th className="px-5 py-3 text-center text-xs font-bold text-gray-600 uppercase">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -83,6 +97,11 @@ export default function Users() {
                       {user.statut}
                     </span>
                   </td>
+                  <td className="px-5 py-4 text-center">
+                    <button onClick={() => openEditUser(user)} className="text-blue-400 hover:text-blue-600 transition-colors">
+                      <i className="fa-solid fa-pencil"></i>
+                    </button>
+                  </td>
                 </tr>
               ))
             ) : (
@@ -99,8 +118,10 @@ export default function Users() {
       {/* 3. APPEL DU FORMULAIRE : C'est ici que l'erreur est corrigée */}
       {isModalOpen && (
         <UserForm 
-          onClose={() => setIsModalOpen(false)} 
-          onSubmit={handleAddUser} 
+          onClose={closeModal} 
+          onSubmit={handleSaveUser} 
+          initialData={editingUser}
+          submitLabel={editingUser ? "Modifier" : "Créer"}
         />
       )}
     </Layout>

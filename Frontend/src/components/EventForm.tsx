@@ -4,6 +4,17 @@ import axios from 'axios';
 interface EventFormProps {
   onClose: () => void;
   onSubmit: (data: any) => void;
+  initialData?: {
+    id?: number;
+    titre?: string;
+    date_debut?: string;
+    date_fin?: string;
+    lieu?: string;
+    categorie?: string;
+    description?: string;
+    budget_alloue?: number;
+    id_responsable?: number;
+  };
 }
 
 interface User {
@@ -14,17 +25,17 @@ interface User {
   statut: string;
 }
 
-export default function EventForm({ onClose, onSubmit }: EventFormProps) {
+export default function EventForm({ onClose, onSubmit, initialData }: EventFormProps) {
   const [formData, setFormData] = useState({
-    titre: '',
-    date_debut: '',
-    date_fin: '',
-    lieu: '',
-    categorie: 'Innovation',
-    description: '',
-    budget_alloue: '',
+    titre: initialData?.titre || '',
+    date_debut: initialData?.date_debut || '',
+    date_fin: initialData?.date_fin || '',
+    lieu: initialData?.lieu || '',
+    categorie: initialData?.categorie || 'Innovation',
+    description: initialData?.description || '',
+    budget_alloue: initialData?.budget_alloue ? String(initialData.budget_alloue) : '',
     statut: 'À venir',
-    id_responsable: ''
+    id_responsable: initialData?.id_responsable ? String(initialData.id_responsable) : ''
   });
 
   const [administrators, setAdministrators] = useState<User[]>([]);
@@ -85,11 +96,28 @@ export default function EventForm({ onClose, onSubmit }: EventFormProps) {
     fetchAdministrators();
   }, []);
 
+  // Mettre à jour formData quand initialData change
+  useEffect(() => {
+    if (initialData?.id) {
+      setFormData({
+        titre: initialData.titre || '',
+        date_debut: initialData.date_debut || '',
+        date_fin: initialData.date_fin || '',
+        lieu: initialData.lieu || '',
+        categorie: initialData.categorie || 'Innovation',
+        description: initialData.description || '',
+        budget_alloue: initialData.budget_alloue ? String(initialData.budget_alloue) : '',
+        statut: 'À venir',
+        id_responsable: initialData.id_responsable ? String(initialData.id_responsable) : ''
+      });
+    }
+  }, [initialData?.id]);
+
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
         <div className="bg-slate-800 p-4 text-white flex justify-between items-center">
-          <h3 className="font-bold text-orange-500 uppercase text-sm tracking-widest">Détails de l'Événement</h3>
+          <h3 className="font-bold text-orange-500 uppercase text-sm tracking-widest">{initialData?.id ? 'Modifier' : 'Créer'} l'Événement</h3>
           <button onClick={onClose} type="button" className="text-slate-400 hover:text-white">
             <i className="fa-solid fa-xmark"></i>
           </button>

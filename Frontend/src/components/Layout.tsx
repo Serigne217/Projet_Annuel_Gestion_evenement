@@ -40,22 +40,6 @@ export default function Layout({ children, title, searchTerm, onSearch }: Layout
         <main className="flex-1 overflow-y-auto p-8">
           {children}
         </main>
-        {/* Affichage de l'utilisateur connecté en bas à gauche */}
-        {user && (
-          <footer className="bg-white border-t border-gray-200 px-8 py-4">
-            <div className="flex items-center text-sm text-gray-600">
-              <i className="fa-solid fa-user-circle text-gray-400 mr-3 text-lg"></i>
-              <div>
-                <span className="font-medium text-gray-800">
-                  {user.prenom} {user.nom}
-                </span>
-                <span className="ml-2 px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
-                  {user.type_utilisateur || 'Utilisateur'}
-                </span>
-              </div>
-            </div>
-          </footer>
-        )}
       </div>
     </div>
   );

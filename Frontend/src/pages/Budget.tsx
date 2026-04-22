@@ -54,10 +54,11 @@ export default function Budget() {
   // CRÉATION - Port 8090
   const handleCreateTransaction = async (data: any) => {
     try {
+      const montant = Math.abs(parseFloat(data.montant) || 0);
       const transactionToSend = {
         date_mouvement: data.date_mouvement,
-        type: data.type === 'Débit' ? 'Dépense' : 'Recette',
-        montant: parseFloat(data.montant),
+        type: data.type === 'Dépense' ? 'Dépense' : 'Recette',
+        montant,
         description: data.description,
         valide: data.valide,
         id_evt: parseInt(data.id_evt),
@@ -78,27 +79,20 @@ export default function Budget() {
   }, []);
 
   // Calcul des statistiques
-  const getTotalBudget = () => {
-    const depenses = transactions
-      .filter(t => t.type === "Dépense" && t.valide)
-      .reduce((sum, t) => sum + t.montant, 0);
-    return depenses;
-  };
-
-  const getReceipts = () => {
-    return transactions
-      .filter(t => t.type === "Recette" && t.valide)
-      .reduce((sum, t) => sum + t.montant, 0);
-  };
+  const initialBudget = events.reduce((sum, evt) => sum + (evt.budget_alloue || 0), 0);
+  const totalExpenses = transactions
+    .filter(t => t.type === "Dépense" && t.valide)
+    .reduce((sum, t) => sum + t.montant, 0);
+  const totalReceipts = transactions
+    .filter(t => t.type === "Recette" && t.valide)
+    .reduce((sum, t) => sum + t.montant, 0);
+  const budgetTotal = initialBudget + totalReceipts - totalExpenses;
+  const remainingToSpend = initialBudget - totalExpenses;
 
   const getCategoryName = (id: number) => {
     const cat = categories.find(c => c.id_cat === id);
     return cat ? cat.nom_categorie : "Non catégorisée";
   };
-
-  const totalReceipts = getReceipts();
-  const totalExpenses = getTotalBudget();
-  const budgetRemaining = 25000 - totalExpenses;
 
   return (
     <Layout title="Gestion Budgétaire 2026" searchTerm={searchTerm} onSearch={setSearchTerm}>
@@ -109,14 +103,11 @@ export default function Budget() {
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-bold text-gray-700 text-lg">Budget Total</h3>
-            <span className="text-sm font-semibold text-gray-500">25 000 €</span>
+            <span className="text-sm font-semibold text-gray-500">{budgetTotal.toFixed(2)} €</span>
           </div>
           <div className="mb-2 flex justify-between text-sm">
             <span className="text-red-600 font-bold">Dépenses : {totalExpenses.toFixed(2)} €</span>
-            <span className="text-gray-400">Reste : {budgetRemaining.toFixed(2)} €</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-4">
-            <div className="bg-red-500 h-4 rounded-full" style={{ width: `${(totalExpenses / 25000) * 100}%` }}></div>
+            <span className="text-gray-400">Reste : {remainingToSpend.toFixed(2)} €</span>
           </div>
         </div>
 
@@ -134,8 +125,8 @@ export default function Budget() {
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-bold text-gray-700 text-lg">Solde Net</h3>
           </div>
-          <div className={`text-3xl font-bold ${(totalReceipts - totalExpenses) >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-            {(totalReceipts - totalExpenses).toFixed(2)} €
+          <div className={`text-3xl font-bold ${remainingToSpend >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+            {remainingToSpend.toFixed(2)} €
           </div>
         </div>
       </div>

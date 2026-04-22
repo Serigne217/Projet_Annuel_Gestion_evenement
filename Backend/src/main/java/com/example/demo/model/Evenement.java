@@ -30,7 +30,7 @@ public class Evenement {
     private String titre;
 
     @Column(name = "date_debut")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd' à 'HH:mm")
     private LocalDateTime date_debut; 
 
     @Column(name = "date_fin")

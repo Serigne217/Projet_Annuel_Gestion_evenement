@@ -11,6 +11,7 @@ interface Category {
 export default function Categories() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
 
   // Récupération des catégories depuis le Backend (Port 8090)
   const fetchCategories = async () => {
@@ -26,14 +27,40 @@ export default function Categories() {
     fetchCategories();
   }, []);
 
-  const handleCreate = async (data: any) => {
+  const handleSaveCategory = async (data: any) => {
     try {
-      await axios.post("http://localhost:8090/api/categories", data);
-      fetchCategories(); // Recharger la liste
-      setIsModalOpen(false); // Fermer le formulaire
+      if (editingCategory?.id_cat) {
+        await axios.put(`http://localhost:8090/api/categories/${editingCategory.id_cat}`, data);
+      } else {
+        await axios.post("http://localhost:8090/api/categories", data);
+      }
+      fetchCategories();
+      setIsModalOpen(false);
+      setEditingCategory(null);
     } catch (error) {
-      alert("Erreur lors de la création de la catégorie");
+      alert("Erreur lors de l'enregistrement de la catégorie");
     }
+  };
+
+  const handleDeleteCategory = async (id: number) => {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer cette catégorie ?")) {
+      try {
+        await axios.delete(`http://localhost:8090/api/categories/${id}`);
+        fetchCategories();
+      } catch (error) {
+        alert("Erreur lors de la suppression de la catégorie");
+      }
+    }
+  };
+
+  const openEditCategory = (category: Category) => {
+    setEditingCategory(category);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setEditingCategory(null);
+    setIsModalOpen(false);
   };
 
   return (
@@ -61,9 +88,14 @@ export default function Categories() {
                 </div>
                 <span className="font-bold text-gray-700">{cat.nom_categorie}</span>
               </div>
-              <button className="text-gray-300 hover:text-red-500 transition-colors">
-                <i className="fa-solid fa-trash-can"></i>
-              </button>
+              <div className="flex items-center gap-3">
+                <button onClick={() => openEditCategory(cat)} className="text-blue-400 hover:text-blue-600 transition-colors">
+                  <i className="fa-solid fa-pencil"></i>
+                </button>
+                <button onClick={() => handleDeleteCategory(cat.id_cat)} className="text-gray-300 hover:text-red-500 transition-colors">
+                  <i className="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
             </div>
           ))
         ) : (
@@ -76,8 +108,10 @@ export default function Categories() {
       {/* Affichage du formulaire modal */}
       {isModalOpen && (
         <CategoryForm 
-          onClose={() => setIsModalOpen(false)} 
-          onSubmit={handleCreate} 
+          onClose={closeModal} 
+          onSubmit={handleSaveCategory} 
+          initialData={editingCategory ? { nom_categorie: editingCategory.nom_categorie } : undefined}
+          submitLabel={editingCategory ? "Modifier" : "Ajouter"}
         />
       )}
     </Layout>

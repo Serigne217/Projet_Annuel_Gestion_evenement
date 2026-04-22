@@ -54,9 +54,9 @@ export default function TransactionForm({ onClose, onSubmit, evenements, categor
 
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Montant (€)</label>
-            <input type="number" step="0.01" required className="w-full p-2.5 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+            <input type="number" min="0.01" step="0.01" required className="w-full p-2.5 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
               value={formData.montant}
-              onChange={(e) => setFormData({...formData, montant: e.target.value})} />
+              onChange={(e) => setFormData({...formData, montant: String(Math.abs(parseFloat(e.target.value) || 0))})} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">

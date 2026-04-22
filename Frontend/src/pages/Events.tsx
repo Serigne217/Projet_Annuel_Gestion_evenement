@@ -17,6 +17,7 @@ interface EventItem {
 export default function Events() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<EventItem | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
   // RÉCUPÉRATION - Port 8090
@@ -31,8 +32,8 @@ export default function Events() {
 
   useEffect(() => { fetchEvents(); }, []);
 
-  // CRÉATION - Port 8090
-  const handleCreate = async (data: any) => {
+  // CRÉATION / MODIFICATION - Port 8090
+  const handleCreateOrEdit = async (data: any) => {
     const eventToSend = {
       titre: data.titre,
       date_debut: data.date_debut,
@@ -41,14 +42,21 @@ export default function Events() {
       categorie: data.categorie || "Général",
       description: data.description || "",
       budget_alloue: data.budget_alloue ? parseFloat(data.budget_alloue) : 0,
-      statut: "À venir",
+      ...(editingEvent?.id ? {} : { statut: "À venir" }), // Statut seulement à la création
       id_responsable: data.id_responsable ? parseInt(data.id_responsable) : 1
     };
 
     try {
-      await axios.post("http://localhost:8090/api/events", eventToSend);
+      if (editingEvent?.id) {
+        // Modification - le backend recalculera le statut
+        await axios.put(`http://localhost:8090/api/events/${editingEvent.id}`, eventToSend);
+      } else {
+        // Création - initialise le statut à "À venir"
+        await axios.post("http://localhost:8090/api/events", eventToSend);
+      }
       fetchEvents();
       setIsModalOpen(false);
+      setEditingEvent(null);
     } catch (error: any) {
       console.error("Erreur serveur:", error.response?.data);
       alert("Erreur d'enregistrement sur le port 8090.");
@@ -67,11 +75,29 @@ export default function Events() {
     }
   };
 
+  // Ouverture du formulaire en mode création
+  const openCreateForm = () => {
+    setEditingEvent(null);
+    setIsModalOpen(true);
+  };
+
+  // Ouverture du formulaire en mode édition
+  const openEditForm = (event: EventItem) => {
+    setEditingEvent(event);
+    setIsModalOpen(true);
+  };
+
+  // Fermeture du modal
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingEvent(null);
+  };
+
   return (
     <Layout title="Gestion des Événements" searchTerm={searchTerm} onSearch={setSearchTerm}>
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-gray-600 font-medium">Liste des projets</h3>
-        <button onClick={() => setIsModalOpen(true)} className="bg-orange-500 text-white px-6 py-2 rounded-xl font-bold shadow-lg hover:bg-orange-600 transition-all">
+        <button onClick={openCreateForm} className="bg-orange-500 text-white px-6 py-2 rounded-xl font-bold shadow-lg hover:bg-orange-600 transition-all">
           + Nouvel Événement
         </button>
       </div>
@@ -100,7 +126,10 @@ export default function Events() {
                   </span>
                 </td>
                 <td className="px-5 py-4 text-right font-medium">{event.budget_alloue} €</td>
-                <td className="px-5 py-4 text-center">
+                <td className="px-5 py-4 text-center space-x-2">
+                  <button onClick={() => openEditForm(event)} className="text-blue-400 hover:text-blue-600 transition-colors">
+                    <i className="fa-solid fa-pencil"></i>
+                  </button>
                   <button onClick={() => deleteEvent(event.id)} className="text-red-400 hover:text-red-600 transition-colors">
                     <i className="fa-solid fa-trash-can"></i>
                   </button>
@@ -112,7 +141,7 @@ export default function Events() {
       </div>
 
       {isModalOpen && (
-        <EventForm onClose={() => setIsModalOpen(false)} onSubmit={handleCreate} />
+        <EventForm onClose={closeModal} onSubmit={handleCreateOrEdit} initialData={editingEvent || undefined} />
       )}
     </Layout>
   );

@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -54,6 +56,34 @@ public class EvenementController {
             evenement.setId_responsable(1);
         }
         return evenementRepository.save(evenement);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateEvent(@PathVariable Integer id, @RequestBody Evenement evenementDetails) {
+        Optional<Evenement> eventOptional = evenementRepository.findById(id);
+        if (!eventOptional.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Evenement event = eventOptional.get();
+        
+        // Mettre à jour les données
+        event.setTitre(evenementDetails.getTitre());
+        event.setDate_debut(evenementDetails.getDate_debut());
+        event.setDate_fin(evenementDetails.getDate_fin());
+        event.setLieu(evenementDetails.getLieu());
+        event.setCategorie(evenementDetails.getCategorie());
+        event.setDescription(evenementDetails.getDescription());
+        event.setBudget_alloue(evenementDetails.getBudget_alloue());
+        event.setId_responsable(evenementDetails.getId_responsable());
+
+        // Recalculer le statut basé sur les nouvelles dates
+        LocalDateTime now = LocalDateTime.now();
+        String newStatus = calculateEventStatus(event, now);
+        event.setStatut(newStatus);
+
+        Evenement updatedEvent = evenementRepository.save(event);
+        return ResponseEntity.ok(updatedEvent);
     }
 
     // Méthode utilitaire pour calculer le statut d'un événement

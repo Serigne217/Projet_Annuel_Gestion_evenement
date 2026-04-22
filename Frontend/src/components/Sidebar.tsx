@@ -1,12 +1,17 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Sidebar() {
   const { pathname } = useLocation();
+  const { user } = useAuth();
   
   const linkClass = (path: string) => 
     `flex items-center p-3 rounded-lg transition ${
       pathname === path ? 'bg-orange-600 text-white shadow-md' : 'text-slate-300 hover:bg-slate-700'
     }`;
+
+  // Obtenir la première lettre du prénom pour l'avatar
+  const avatarLetter = user?.prenom?.charAt(0).toUpperCase() || 'U';
 
   return (
     <div className="w-64 bg-slate-800 text-white flex flex-col hidden md:flex h-screen sticky top-0">
@@ -54,10 +59,10 @@ export default function Sidebar() {
 
       <div className="p-4 border-t border-slate-700">
         <div className="flex items-center">
-          <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center font-bold text-xs">A</div>
+          <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center font-bold text-xs">{avatarLetter}</div>
           <div className="ml-3">
-            <p className="text-sm font-medium">Antoisse</p>
-            <p className="text-[10px] text-slate-400">Administrateur</p>
+            <p className="text-sm font-medium">{user?.prenom} {user?.nom}</p>
+            <p className="text-[10px] text-slate-400">{user?.type_utilisateur || 'Utilisateur'}</p>
           </div>
         </div>
       </div>

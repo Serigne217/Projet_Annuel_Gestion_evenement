@@ -1,12 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface CatFormProps {
   onClose: () => void;
   onSubmit: (data: any) => void;
+  initialData?: { nom_categorie?: string };
+  submitLabel?: string;
 }
 
-export default function CategoryForm({ onClose, onSubmit }: CatFormProps) {
+export default function CategoryForm({ onClose, onSubmit, initialData, submitLabel = 'Ajouter' }: CatFormProps) {
   const [nom, setNom] = useState('');
+
+  useEffect(() => {
+    if (initialData?.nom_categorie) {
+      setNom(initialData.nom_categorie);
+    }
+  }, [initialData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +62,7 @@ export default function CategoryForm({ onClose, onSubmit }: CatFormProps) {
               type="submit" 
               className="w-full py-3 bg-orange-500 text-white rounded-xl font-bold shadow-lg shadow-orange-100 hover:bg-orange-600 hover:-translate-y-0.5 transition-all"
             >
-              AJOUTER LA CATÉGORIE
+              {submitLabel} la catégorie
             </button>
             <button 
               type="button" 
