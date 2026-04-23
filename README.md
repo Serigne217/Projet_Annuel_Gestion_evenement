@@ -27,7 +27,7 @@ Tailwind CSS
 
 **Base de données**
 
-SQL (script fourni)
+SQL (script fourni **bd.sql**)
 
 3) Fonctionnalités principales
 
@@ -39,13 +39,11 @@ Tableau de bord interactif
 
 4) Aperçu
 
-👉 (Ajoute ici des captures d’écran — très important)
-
-Exemple :
-
-Dashboard
-Page événements
-Gestion des budgets
+![alt text](Page_Authentification.png)
+![alt text](Page_Dashboard.png)
+![alt text](Page_événements.png)
+![alt text](Page_CatégorieBudget.png)
+![alt text](Page_Parteniaires.png)
 
 5) Comment Lancer le projet
 
