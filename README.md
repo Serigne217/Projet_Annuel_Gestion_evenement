@@ -61,10 +61,10 @@ npm run dev (pour lancer le Frontend)
 
 Ce que j’ai réalisé : 
 
-Conception de l’architecture backend (Spring Boot)
+Participation à la Conception de l’architecture backend (Spring Boot)
 Création des API REST
-Développement de l’interface utilisateur en React
-Mise en place de la communication frontend/backend
+Participation au Développement de l’interface utilisateur en React
+Participation à la Mise en place de la communication frontend/backend
 Structuration de la base de données
 
 6) Améliorations prévues : 
