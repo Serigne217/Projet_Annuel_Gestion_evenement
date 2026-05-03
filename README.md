@@ -1,81 +1,185 @@
-# Gestion des événements internes – Sopra Steria
+# Projet Annuel SOPRA
 
-1) Présentation
+## Présentation
 
-Application web complète permettant de gérer les événements internes de l' entreprise **Sopra Steria**: utilisateurs, partenaires, budgets, transactions et comptes rendus.
+Ce projet est une application web composée de :
 
-Ce projet a été réalisé dans le cadre de mon Master 1 informatique.
+- un **frontend React** ;
+- un **backend Spring Boot** ;
+- une **base de données MySQL**.
 
-🎯 Objectifs
-Centraliser la gestion des événements
-Suivre les budgets et dépenses
-Faciliter la prise de décision via des rapports structurés
+Le backend communique avec une base de données nommée `projet_annuel_m1`, puis expose des routes API utilisées par le frontend. [file:569]
 
-2) Stack technique
+---
 
-**Backend**
+## Prérequis
 
-Java + Spring Boot
-API REST
-JPA / Hibernate
+Avant de démarrer le projet, il faut avoir installé :
 
-**Frontend**
+- **Node.js** et **npm** pour le frontend ; [web:923]
+- **Java 21** pour le backend Spring Boot ; [file:776]
+- **Maven** (ou utiliser le wrapper `mvnw`) pour lancer le backend ; [image:938]
+- **MySQL Server**, **XAMPP** ou **WAMP** avec MySQL actif. [file:569]
 
-React + TypeScript
-Vite
-Tailwind CSS
+---
 
-**Base de données**
+## Structure du projet
 
-SQL (script fourni **bd.sql**)
+Le projet contient deux parties principales :
 
-3) Fonctionnalités principales
+- le **frontend React** ;
+- le **backend** dans le dossier `Backend`. 
 
-Gestion des événements
-Gestion des utilisateurs et partenaires
-Suivi des transactions et catégories de budget
-Création de comptes rendus
-Tableau de bord interactif
+La classe principale du backend est :
 
-4) Aperçu
+```java
+DemoApplication
+```
 
-![alt text](Page_Authentification.png)
-![alt text](Page_Dashboard.png)
-![alt text](Page_événements.png)
-![alt text](Page_CatégorieBudget.png)
-![alt text](Page_Parteniaires.png)
+Elle permet de lancer l’application Spring Boot. 
 
-5) Comment Lancer le projet
+---
 
-ouvrir le dossier PROJET_ANNUEL_M1 sur votre navigateur, 
-ensuite ouvrez votre terminal et séparer le en deux et faite sur l'un :
+## Lancement de la base de données
 
+### 1. Démarrer MySQL
+
+Commencer par démarrer le serveur MySQL en local depuis :
+
+- XAMPP ;
+- WAMP ;
+- ou un service MySQL installé sur la machine. 
+
+### 2. Créer la base de données
+
+Créer une base de données nommée :
+
+```sql
+projet_annuel_m1
+```
+
+### 3. Importer le script SQL
+
+Importer le fichier SQL du projet dans cette base afin de créer les tables et insérer les données initiales. 
+
+Exemple de commande possible en terminal :
+
+```bash
+mysql -u root -p projet_annuel_m1 < bd.sql
+```
+
+ou, si le mot de passe MySQL est vide :
+
+```bash
+mysql -u root projet_annuel_m1 < bd.sql
+```
+
+L’import SQL permet d’initialiser la structure de la base ainsi que les premières données nécessaires au projet. 
+
+---
+
+## Configuration du backend
+
+Le fichier `application.properties` doit être configuré pour utiliser MySQL en local.
+
+Exemple :
+
+```properties
+spring.datasource.url=jdbc:mysql://127.0.0.1:3306/projet_annuel_m1?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+spring.datasource.username=root
+spring.datasource.password=
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
+server.port=8090
+```
+
+Si votre serveur MySQL possède un mot de passe, il faut le renseigner dans :
+
+```properties
+spring.datasource.password=VOTRE_MOT_DE_PASSE
+```
+
+Le backend écoute ensuite sur le port `8090`. 
+
+---
+
+## Lancement du backend
+
+Se placer dans le dossier `Backend` :
+
+```bash
 cd Backend
-./mvnw spring-boot:run (pour lancer la Backend)
+```
 
-et sur l'autre : 
+### Avec Maven
 
-cd Frontend
+```bash
+mvn spring-boot:run
+```
+
+### Avec le wrapper Maven
+
+```bash
+./mvnw spring-boot:run
+```
+
+### Depuis l’IDE
+
+Il est aussi possible d’ouvrir le dossier `Backend` dans IntelliJ IDEA ou VS Code et d’exécuter directement la classe :
+
+```java
+DemoApplication
+```
+
+## Lancement du frontend
+
+Se placer dans le dossier du frontend :
+
+```bash
+cd frontend
+```
+
+Installer les dépendances :
+
+```bash
 npm install
-npm run dev (pour lancer le Frontend)
+```
 
-Ce que j’ai réalisé : 
+Puis lancer le serveur de développement :
 
-Participation à la Conception de l’architecture backend (Spring Boot)
-Création des API REST
-Participation au Développement de l’interface utilisateur en React
-Participation à la Mise en place de la communication frontend/backend
-Structuration de la base de données
+```bash
+npm run dev
+```
 
-6) Améliorations prévues : 
+Avec Vite, le frontend est généralement accessible sur :
 
-gestion des rôles
-Tests automatisés
-Export PDF
-Tableau de bord analytique avancé
+```text
+http://localhost:5173
+```
 
-8) Points forts
+Le serveur de développement Vite est utilisé pour lancer l’application React en local.
 
-Architecture full-stack moderne
-Séparation claire frontend / backend
-Utilisation de technologies demandées en entreprise (React, API REST, JAVA, Java Script)
+---
+
+## Ordre de démarrage recommandé
+
+Pour lancer correctement le projet en local :
+
+1. Démarrer MySQL.
+2. Créer la base `projet_annuel_m1`.
+3. Importer le script SQL.
+4. Lancer le backend Spring Boot avec `DemoApplication`.
+5. Lancer le frontend React avec `npm run dev`. 
+
+---
+
+## Vérification rapide
+
+Une fois tout lancé :
+- **frontend** : [http://localhost:5173](http://localhost:5173)
+
+Si l’API répond dans le navigateur et que le frontend s’ouvre correctement, alors le projet est prêt à être utilisé en local.
